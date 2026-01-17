@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>YouTube Auto Player</title>
+</head>
+<body>
+
+<h2>YouTube Auto Player</h2>
+<div id="player"></div>
+
+<script>
+const LINKS =
+"https://raw.githubusercontent.com/aaqibgulzar1234-bot/New/main/links.txt";
+
+let videos = [];
+let i = 0;
+let player;
+
+const tag = document.createElement("script");
+tag.src = "https://www.youtube.com/iframe_api";
+document.body.appendChild(tag);
+
+fetch(LINKS)
+.then(r => r.text())
+.then(t => {
+  videos = t.split("\n")
+    .map(l => l.trim())
+    .filter(l => l)
+    .map(l => new URL(l).searchParams.get("v"));
+});
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player("player", {
+    height: "315",
+    width: "560",
+    playerVars: { autoplay: 1 },
+    events: { onStateChange }
+  });
+}
+
+function onStateChange(e) {
+  if (e.data === YT.PlayerState.PLAYING && i === 0) {
+    player.loadVideoById(videos[0]);
+  }
+  if (e.data === YT.PlayerState.ENDED) {
+    i = (i + 1) % videos.length;
+    player.loadVideoById(videos[i]);
+  }
+}
+</script>
+
+</body>
+</html>
